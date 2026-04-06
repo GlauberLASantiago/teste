@@ -48,7 +48,135 @@
 
 <script>
     const SUPABASE_URL = 'https://outafyuukzxqhqvnkjva.supabase.co';
+    const SUPABASE_ANON_KEY = '<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Completo - Google + Supabase</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        button { padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; font-weight: bold; }
+        input[type="text"] { width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        #login-btn { background-color: #4285F4; color: white; }
+        #logout-btn { background-color: #d9534f; color: white; }
+        #salvar-btn { background-color: #28a745; color: white; }
+        #profile-section, #app-section { display: none; }
+        img { border-radius: 50%; width: 50px; height: 50px; vertical-align: middle; margin-right: 10px; }
+        .mensagem-item { background: #e9ecef; padding: 10px; border-radius: 5px; margin-top: 10px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Meu App Oficial</h2>
+
+    <div id="login-section">
+        <p>Faça login para continuar</p>
+        <button id="login-btn" onclick="loginComGoogle()">Entrar com o Google</button>
+    </div>
+
+    <div id="profile-section">
+        <hr>
+        <p style="display: flex; align-items: center;">
+            <img id="user-avatar" src="" alt="Avatar">
+            <strong id="user-name"></strong>
+        </p>
+        <button id="logout-btn" onclick="logout()">Sair da Conta</button>
+        <hr>
+    </div>
+
+    <div id="app-section">
+        <h3>Nova Mensagem</h3>
+        <input type="text" id="texto-mensagem" placeholder="Digite algo para salvar...">
+        <button id="salvar-btn" onclick="salvarDados()">Salvar no Supabase</button>
+        <div id="lista-mensagens" style="margin-top:15px;">Carregando...</div>
+    </div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://outafyuukzxqhqvnkjva.supabase.co';
     const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_GIGANTE_QUE_COMECA_COM_eyJ_AQUI';
+
+    const meuSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let usuarioAtual = null;
+
+    async function loginComGoogle() {
+        await meuSupabase.auth.signInWithOAuth({ provider: 'google' });
+    }
+
+    async function logout() {
+        await meuSupabase.auth.signOut();
+    }
+
+    meuSupabase.auth.onAuthStateChange((event, session) => {
+        const loginSection = document.getElementById('login-section');
+        const profileSection = document.getElementById('profile-section');
+        const appSection = document.getElementById('app-section');
+
+        if (session && session.user) {
+            usuarioAtual = session.user;
+            loginSection.style.display = 'none';
+            profileSection.style.display = 'block';
+            appSection.style.display = 'block';
+
+            const meta = session.user.user_metadata;
+            document.getElementById('user-name').innerText = meta.full_name || 'Usuário';
+            document.getElementById('user-avatar').src = meta.avatar_url || '';
+            
+            carregarDados();
+        } else {
+            usuarioAtual = null;
+            loginSection.style.display = 'block';
+            profileSection.style.display = 'none';
+            appSection.style.display = 'none';
+        }
+    });
+
+    async function salvarDados() {
+        const input = document.getElementById('texto-mensagem');
+        const texto = input.value;
+        if (!texto) return alert('Digite alguma coisa!');
+
+        const { error } = await meuSupabase.from('app_mensagens').insert([{ user_id: usuarioAtual.id, texto: texto }]);
+
+        if (error) {
+            alert('Erro ao salvar: ' + error.message);
+        } else {
+            input.value = '';
+            carregarDados();
+        }
+    }
+
+    async function carregarDados() {
+        const divLista = document.getElementById('lista-mensagens');
+        divLista.innerHTML = 'Carregando...';
+
+        const { data, error } = await meuSupabase.from('app_mensagens').select('*').order('criado_em', { ascending: false });
+
+        if (error) {
+            divLista.innerHTML = 'Erro ao carregar dados.';
+            return;
+        }
+
+        divLista.innerHTML = '';
+        if (data.length === 0) {
+            divLista.innerHTML = 'Nenhuma mensagem salva.';
+        } else {
+            data.forEach(item => {
+                const divItem = document.createElement('div');
+                divItem.className = 'mensagem-item';
+                divItem.innerText = item.texto;
+                divLista.appendChild(divItem);
+            });
+        }
+    }
+</script>
+
+</body>
+</html>';
 
     const meuSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let usuarioAtual = null;
