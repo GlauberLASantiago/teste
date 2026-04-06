@@ -55,7 +55,14 @@
     let usuarioAtual = null;
 
     async function loginComGoogle() {
-        await meuSupabase.auth.signInWithOAuth({ provider: 'google' });
+       async function loginComGoogle() {
+        await meuSupabase.auth.signInWithOAuth({ 
+            provider: 'google',
+            options: {
+                // Aqui nós FORÇAMOS o endereço exato de retorno
+                redirectTo: 'https://glauberlasantiago.github.io/teste/'
+            }
+        });
     }
 
     async function logout() {
