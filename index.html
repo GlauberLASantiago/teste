@@ -54,7 +54,7 @@
     const meuSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let usuarioAtual = null;
 
-    async function loginComGoogle() {
+   
        async function loginComGoogle() {
         await meuSupabase.auth.signInWithOAuth({ 
             provider: 'google',
